@@ -16,6 +16,7 @@ bin/
 *.jar
 *.war
 *.ear
+obj/
 
 # Logs
 logs/
