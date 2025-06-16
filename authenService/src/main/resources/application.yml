@@ -12,9 +12,9 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka
 
-grpc:
-  server:
-    port: 9091
+jwt:
+  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+  expiration: 86400000 # 24 hours
 
 auth:
   gateway:
@@ -43,6 +43,4 @@ auth:
       Zkr4jEUbK0vE4vxmxH2uNEsozlkvbvMsMny5JzBlCtEtm0ccbFnSeQI22wyPvsoD
       lfojRivU0dADNQT+7GinBUleqtmMUh7M3vdxSl0jLE/w3SQI+e4EgyYCPpRSY0UL
       xESm8csCgYEAh+2o1ihMDiKTKKvDQpXXdnK9Hu86YO8ppsPOWUFNLKagFP6YXdsV
-      VP0Cy5giKx1hzLDU7k9fkC6jkZeUXi6gxHBxv0eH6uy1ZkduuVVPTW8oPg6Gt21K
-      PLZQlId7KRF/bTTs6qT3teDlLjEomM+OETvD/zzibCXGP4WWqikSTxY=
       -----END RSA PRIVATE KEY-----

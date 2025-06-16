@@ -29,6 +29,6 @@ public class ResponseHeaderFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -1; // Đảm bảo filter này chạy sau các filter khác
+        return -1;
     }
 } 

@@ -65,3 +65,4 @@ Thumbs.db
 # Coverage reports
 coverage/
 .nyc_output/ 
+.fake
