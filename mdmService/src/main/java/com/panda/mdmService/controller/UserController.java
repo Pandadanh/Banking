@@ -1,11 +1,14 @@
 package com.panda.mdmService.controller;
 
+import com.panda.mdmService.exception.InvalidUserDataException;
+import com.panda.mdmService.exception.UserAlreadyExistsException;
+import com.panda.mdmService.exception.UserNotFoundException;
 import com.panda.mdmService.model.User;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.Flux;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,43 +34,70 @@ public class UserController {
     }
 
     @GetMapping
-    public Flux<User> getAllUsers() {
-        return Flux.fromIterable(users.values());
+    public Collection<User> getAllUsers() {
+        return users.values();
     }
 
     @GetMapping("/{id}")
-    public Mono<ResponseEntity<User>> getUserById(@PathVariable String id) {
-        return Mono.just(users.get(id))
-                .map(user -> user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build());
+    public ResponseEntity<User> getUserById(@PathVariable String id) {
+        if (id == null || id.trim().isEmpty()) {
+            throw new InvalidUserDataException("User ID cannot be null or empty");
+        }
+
+        User user = users.get(id);
+        if (user == null) {
+            throw new UserNotFoundException(id);
+        }
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping
-    public Mono<User> createUser(@RequestBody User user) {
+    public User createUser(@Valid @RequestBody User user) {
+        if (user == null) {
+            throw new InvalidUserDataException("User data cannot be null");
+        }
+
+        if (user.getUserId() == null || user.getUserId().trim().isEmpty()) {
+            throw new InvalidUserDataException("User ID cannot be null or empty");
+        }
+
+        if (users.containsKey(user.getUserId())) {
+            throw new UserAlreadyExistsException(user.getUserId());
+        }
+
         users.put(user.getUserId(), user);
-        return Mono.just(user);
+        return user;
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<User>> updateUser(@PathVariable String id, @RequestBody User user) {
-        return Mono.just(users.containsKey(id))
-                .map(exists -> {
-                    if (exists) {
-                        users.put(id, user);
-                        return ResponseEntity.ok(user);
-                    }
-                    return ResponseEntity.notFound().build();
-                });
+    public ResponseEntity<User> updateUser(@PathVariable String id, @Valid @RequestBody User user) {
+        if (id == null || id.trim().isEmpty()) {
+            throw new InvalidUserDataException("User ID cannot be null or empty");
+        }
+
+        if (user == null) {
+            throw new InvalidUserDataException("User data cannot be null");
+        }
+
+        if (!users.containsKey(id)) {
+            throw new UserNotFoundException(id);
+        }
+
+        users.put(id, user);
+        return ResponseEntity.ok(user);
     }
 
     @DeleteMapping("/{id}")
-    public Mono<ResponseEntity<Void>> deleteUser(@PathVariable String id) {
-        return Mono.just(users.containsKey(id))
-                .map(exists -> {
-                    if (exists) {
-                        users.remove(id);
-                        return ResponseEntity.ok().<Void>build();
-                    }
-                    return ResponseEntity.notFound().build();
-                });
+    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
+        if (id == null || id.trim().isEmpty()) {
+            throw new InvalidUserDataException("User ID cannot be null or empty");
+        }
+
+        if (!users.containsKey(id)) {
+            throw new UserNotFoundException(id);
+        }
+
+        users.remove(id);
+        return ResponseEntity.ok().build();
     }
 } 
