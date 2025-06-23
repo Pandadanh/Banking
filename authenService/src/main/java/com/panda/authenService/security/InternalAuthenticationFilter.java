@@ -20,15 +20,30 @@ import java.util.Collections;
 public class InternalAuthenticationFilter extends OncePerRequestFilter {
 
     private final InternalTokenValidator internalTokenValidator;
+    private final InternalTokenFilter internalTokenFilter;
 
-    public InternalAuthenticationFilter(InternalTokenValidator internalTokenValidator) {
+    public InternalAuthenticationFilter(InternalTokenValidator internalTokenValidator, InternalTokenFilter internalTokenFilter) {
         this.internalTokenValidator = internalTokenValidator;
+        this.internalTokenFilter = internalTokenFilter;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
+
+            if(internalTokenFilter.isPublicEndpoint(request.getRequestURI())) {
+                String username = "admin";
+                log.debug("Valid internal token found for user: {}", username);
+
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        username,
+                        null,
+                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_INTERNAL"))
+                );
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+
             String internalToken = getInternalTokenFromRequest(request);
 
             if (StringUtils.hasText(internalToken) && internalTokenValidator.validateInternalToken(internalToken)) {
@@ -52,6 +67,7 @@ public class InternalAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String getInternalTokenFromRequest(HttpServletRequest request) {
+
         return request.getHeader("X-Internal-Auth");
     }
 }

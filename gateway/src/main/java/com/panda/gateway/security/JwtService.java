@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Date;
 import java.util.function.Function;
@@ -21,38 +24,50 @@ public class JwtService {
     @Value("${security.jwt.public-key}")
     private String publicKey;
 
-    private Key getSigningKey() {
-        byte[] keyBytes = Base64.getDecoder().decode(publicKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+    private PublicKey getSigningKey() {
+        try {
+            String cleanedKey = publicKey
+                    .replace("-----BEGIN PUBLIC KEY-----", "")
+                    .replace("-----END PUBLIC KEY-----", "")
+                    .replaceAll("\\s+", ""); // Xoá khoảng trắng và xuống dòng
+
+            byte[] keyBytes = Base64.getDecoder().decode(cleanedKey);
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            return kf.generatePublic(spec);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot parse RSA public key", e);
+        }
     }
 
     public boolean validateToken(String token) {
         try {
             Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+                    .setSigningKey(getSigningKey()) // dùng public key (RSA)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
 
-            // Check if token is expired
-            if (claims.getExpiration().before(new Date())) {
+            Date expiration = claims.getExpiration();
+            if (expiration == null || expiration.before(new Date())) {
                 log.warn("JWT token is expired");
                 return false;
             }
 
             log.debug("JWT token is valid for user: {}", claims.getSubject());
             return true;
+
         } catch (ExpiredJwtException e) {
-            log.warn("JWT token is expired: {}", e.getMessage());
-            return false;
+            log.warn("JWT expired: {}", e.getMessage());
         } catch (JwtException e) {
-            log.error("JWT token validation failed: {}", e.getMessage());
-            return false;
+            log.error("JWT validation failed: {}", e.getMessage());
         } catch (Exception e) {
-            log.error("Unexpected error during JWT validation: {}", e.getMessage());
-            return false;
+            log.error("Unexpected error validating JWT: {}", e.getMessage());
         }
+
+        return false;
     }
+
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

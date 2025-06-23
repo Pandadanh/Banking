@@ -28,7 +28,16 @@ logging:
 security:
   jwt:
     internal-secret-key: "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"
-    public-key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAySwsD24XDZZfVc9rkihW/pZ7zvaOoMgCYoQgmlZpesGPj3nIqi6o5Wt9NgAZTZWsX6FzD97J8O4IkeXshuD5uNHcv7jxaDXnEsajOg21RJZfUj88qrbARTfRDJDN8d/TV+NuHGGuwLcpb5Xsm8ufDb8NibTFDdcpNHmPzs5U8pacy7gOL9KPpoelwqOtluUN6cJxU9v8TiXi23LseGxk35RvEztDwXMrgk4mCCojgjgs46ejIS/nusGzNeN07f7rsPTwinyysBoiwi8pdcOVQnmIfm52KFQek2dyoucC+sVOen9TmP+4HRSYmDr5S2r8Nr6OPlnrEHpZwVPCN+04ywIDAQAB"
+    public-key: "-----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApERMGdiNGoNYk10qFP1N
+        IUChpcRoe7flXDpuHcT7E9XH6bD6MAsXir8dgPUp28iNOyV3VdoqsCUhriSLN/Oe
+        q9IbPb2nIFbJG8g+qh7cabj/yRMM3aH7/n+zKjAkT09/SLxPsdTRarRe1F19z3fa
+        c77dXSbAF0zkE+6nl5HC8KDaud8PwlbxjzAsT7HT4dRQbwEWd9DnhIaGa7O+bDkO
+        jjlgueH7Hm2T1NgPyr1Smyh2eDh0vUUKpyhDSrhjRJEDKTRkIie/QAOGwkAfrQc/
+        fLCLCtNoCZhG/F8T2n52TTjiTgPBOC24kcKXI8mh+mALTqOBsSLJO9huF3+Wgudt
+        lQIDAQAB
+        -----END PUBLIC KEY-----
+        "
     internal-auth-header: "X-Internal-Auth"
     authorization-header: "Authorization"
     token-prefix: "Bearer "

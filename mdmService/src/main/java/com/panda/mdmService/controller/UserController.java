@@ -46,7 +46,7 @@ public class UserController {
 
         User user = users.get(id);
         if (user == null) {
-            throw new UserNotFoundException(id);
+            throw new UserNotFoundException("User not found with ID: " + id);
         }
         return ResponseEntity.ok(user);
     }
@@ -62,7 +62,7 @@ public class UserController {
         }
 
         if (users.containsKey(user.getUserId())) {
-            throw new UserAlreadyExistsException(user.getUserId());
+            throw new UserNotFoundException("User not found with ID: " + user.getUserId());
         }
 
         users.put(user.getUserId(), user);

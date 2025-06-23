@@ -13,7 +13,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.security.Key;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Date;
@@ -27,19 +34,52 @@ public class TokenCacheService {
 
     private final HistoryLoginTenantRepository historyLoginTenantRepository;
 
-    @Value("${security.jwt.secret}")
-    private String jwtSecret;
+    @Value("${security.jwt.private-key}")
+    private String privateKey;
 
     @Value("${security.jwt.expiration:86400000}") // 24 hours default
     private long jwtExpiration;
 
-    private Key getSigningKey() {
-        byte[] keyBytes = Base64.getDecoder().decode(jwtSecret);
-        return Keys.hmacShaKeyFor(keyBytes);
+    private PrivateKey getSigningKey() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+        try {
+            String privateKeyPem = this.privateKey;
+            if (privateKeyPem == null || privateKeyPem.isEmpty()) {
+                throw new IllegalArgumentException("Private key is empty or null");
+            }
+
+            // Thêm header và footer nếu chưa có
+            if (!privateKeyPem.contains("-----BEGIN PRIVATE KEY-----")) {
+                privateKeyPem = "-----BEGIN PRIVATE KEY-----\n" + privateKeyPem + "\n-----END PRIVATE KEY-----";
+            }
+
+            // Xóa header, footer và khoảng trắng
+            privateKeyPem = privateKeyPem
+                    .replace("-----BEGIN PRIVATE KEY-----", "")
+                    .replace("-----END PRIVATE KEY-----", "")
+                    .replaceAll("\\s+", "");
+
+            // Decode Base64 và tạo private key
+            byte[] keyBytes = Base64.getDecoder().decode(privateKeyPem);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+            try {
+                return keyFactory.generatePrivate(keySpec);
+            } catch (InvalidKeySpecException e) {
+                log.error("Invalid key format: {}", e.getMessage());
+                throw new InvalidKeySpecException("Invalid private key format. Please ensure the key is in PKCS#8 format.");
+            }
+        } catch (IllegalArgumentException e) {
+            log.error("Base64 decoding failed: {}", e.getMessage());
+            throw new InvalidKeySpecException("Failed to decode private key. Invalid Base64 format.");
+        } catch (Exception e) {
+            log.error("Failed to load private key: {}", e.getMessage());
+            throw e;
+        }
     }
 
     @Transactional
-    public String generateToken(User user) {
+    public String generateToken(User user) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
         log.info("Generating token for user: {}", user.getUserName());
 
         // Check for existing valid token
@@ -61,7 +101,7 @@ public class TokenCacheService {
                 .claim("tenantId", user.getTenantId() != null ? user.getTenantId().toString() : null)
                 .claim("email", user.getEmail())
                 .claim("name", user.getName())
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .signWith(getSigningKey(), SignatureAlgorithm.RS256)
                 .compact();
 
         // Generate refresh token (longer expiry)
@@ -72,7 +112,7 @@ public class TokenCacheService {
                 .setExpiration(refreshExpiryDate)
                 .claim("type", "refresh")
                 .claim("userId", user.getId().toString())
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .signWith(getSigningKey(), SignatureAlgorithm.RS256)
                 .compact();
 
         // Save to history

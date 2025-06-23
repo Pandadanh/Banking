@@ -7,21 +7,24 @@ spring:
   main:
     web-application-type: servlet
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password: password
-    driver-class-name: org.h2.Driver
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+    url: jdbc:oracle:thin:@localhost:1521/XEPDB1
+    username: BANKING_USER
+    password: BankingPassword123
+    driver-class-name: oracle.jdbc.OracleDriver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      validation-timeout: 5000
+      leak-detection-threshold: 60000
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
+        dialect: org.hibernate.dialect.OracleDialect
         format_sql: true
         jdbc:
           batch_size: 20
@@ -34,12 +37,54 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.value}
 
 security:
   jwt:
     internal-secret-key: "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"
-    public-key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAySwsD24XDZZfVc9rkihW/pZ7zvaOoMgCYoQgmlZpesGPj3nIqi6o5Wt9NgAZTZWsX6FzD97J8O4IkeXshuD5uNHcv7jxaDXnEsajOg21RJZfUj88qrbARTfRDJDN8d/TV+NuHGGuwLcpb5Xsm8ufDb8NibTFDdcpNHmPzs5U8pacy7gOL9KPpoelwqOtluUN6cJxU9v8TiXi23LseGxk35RvEztDwXMrgk4mCCojgjgs46ejIS/nusGzNeN07f7rsPTwinyysBoiwi8pdcOVQnmIfm52KFQek2dyoucC+sVOen9TmP+4HRSYmDr5S2r8Nr6OPlnrEHpZwVPCN+04ywIDAQAB"
-    private-key: "MIIEpQIBAAKCAQEAySwsD24XDZZfVc9rkihW/pZ7zvaOoMgCYoQgmlZpesGPj3nIqi6o5Wt9NgAZTZWsX6FzD97J8O4IkeXshuD5uNHcv7jxaDXnEsajOg21RJZfUj88qrbARTfRDJDN8d/TV+NuHGGuwLcpb5Xsm8ufDb8NibTFDdcpNHmPzs5U8pacy7gOL9KPpoelwqOtluUN6cJxU9v8TiXi23LseGxk35RvEztDwXMrgk4mCCojgjgs46ejIS/nusGzNeN07f7rsPTwinyysBoiwi8pdcOVQnmIfm52KFQek2dyoucC+sVOen9TmP+4HRSYmDr5S2r8Nr6OPlnrEHpZwVPCN+04ywIDAQABAoIBAGyViRqzA4Jz/fVlRdzYJUy5kQ4/CvFBw/fE9YwYxEpcG88HnwYstUFP6X+yQfYcqbPcgyy3xixjbwDBKBANcv0NWaeqfbMQFS+PRB9bstHYkI7mTyqeBd3WqOGtb1v0wjCYM6DiIN8ofhcax2G4YJuc2gPQLOSxlC4cx0CLIlLlfzNoHdPSrWgKfU4R7b9nesOlCuXGXIPsNydGd9itchyr/OYAPizrCwPsinqvA7wzSduJqe7Fn8p0XMCewR+pXylDa280Azb4ftLza2KPxqLVoFq3hPZi4TvfIZbI7Ph2e4F7oSiI9s41tx+GS1Eie9WQTSPsX3gcTprnLcti86ECgYEA8fhF3xaN/B4xA4hRRO64ZT7ybo7TpjVvyHs7IE/iNiTckKPNw5JSyeFlLn1hWx/Knq6NPrga38tTqp4tRUWXBGkArysHG5A/CNmpUb63CSCRLx2dpIFAAAfneq7zH0IG3UvRY0ANpReaC8YLEpRcjt25A4HZ3pVRFC5ZVrALxlkCgYEA1NZRGifIE8uOVYMWeUNpppMp4BlGrF+ZaG/0Lod6sJLtwiOMGOeD54i953ecK8+6POMVOpeawFjFEicbtT+90Im4J5chRtwIgeDdRu7D4TSmQK7nQX5DaDe0f49BBdOch6zPs6vwJ2+Cwvky0aF2dWUXhyUqHx63zj4TaVOf28MCgYEAjk8GSP5q4yyehwVVRsVfjaxHyN4XfFlRNQfE7mwNDur/DdJI4gzcw/7cE0uKRp2b/VeLmqeMprJesqn01hjniKB41ozn0T401G+vNXSFEcklmiBA5s9dZNZOPclHE8sxXlWJAGZboA0RfHstZ+/5v8yHU5i7Gj2XQddAk8tWIYECgYEAoo0wkd5SM7Qid/LPRjwTQ7JfqBUF4f59hsMCZkr4jEUbK0vE4vxmxH2uNEsozlkvbvMsMny5JzBlCtEtm0ccbFnSeQI22wyPvsoDlfojRivU0dADNQT+7GinBUleqtmMUh7M3vdxSl0jLE/w3SQI+e4EgyYCPpRSY0ULxESm8csCgYEAh+2o1ihMDiKTKKvDQpXXdnK9Hu86YO8ppsPOWUFNLKagFP6YXdsV"
+    public-key: "-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApERMGdiNGoNYk10qFP1N
+IUChpcRoe7flXDpuHcT7E9XH6bD6MAsXir8dgPUp28iNOyV3VdoqsCUhriSLN/Oe
+q9IbPb2nIFbJG8g+qh7cabj/yRMM3aH7/n+zKjAkT09/SLxPsdTRarRe1F19z3fa
+c77dXSbAF0zkE+6nl5HC8KDaud8PwlbxjzAsT7HT4dRQbwEWd9DnhIaGa7O+bDkO
+jjlgueH7Hm2T1NgPyr1Smyh2eDh0vUUKpyhDSrhjRJEDKTRkIie/QAOGwkAfrQc/
+fLCLCtNoCZhG/F8T2n52TTjiTgPBOC24kcKXI8mh+mALTqOBsSLJO9huF3+Wgudt
+lQIDAQAB
+-----END PUBLIC KEY-----
+"
+    private-key: "-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCkREwZ2I0ag1iT
+XSoU/U0hQKGlxGh7t+VcOm4dxPsT1cfpsPowCxeKvx2A9SnbyI07JXdV2iqwJSGu
+JIs3856r0hs9vacgVskbyD6qHtxpuP/JEwzdofv+f7MqMCRPT39IvE+x1NFqtF7U
+XX3Pd9pzvt1dJsAXTOQT7qeXkcLwoNq53w/CVvGPMCxPsdPh1FBvARZ30OeEhoZr
+s75sOQ6OOWC54fsebZPU2A/KvVKbKHZ4OHS9RQqnKENKuGNEkQMpNGQiJ79AA4bC
+QB+tBz98sIsK02gJmEb8XxPafnZNOOJOA8E4LbiRwpcjyaH6YAtOo4GxIsk72G4X
+f5aC522VAgMBAAECggEAEoU0w1E8D3oxmWPOo9EvSgl8cDElypUgQfbAhZC48jKP
+OJTgkFwfyl/j1q9Nid8htUJzIvXXDEcTdgveum84O40TzzE7z5SZVg2MqyeRmEXo
+aOZB9BcYT0hcjewhm+ONqUi5/4XMGqi9bFoiHisYMSaa1K7Sx42+xVSKBrfDb9e0
+s5A6SFOjABdAoK76f9zd6N2s6v8xtzoB+6B+B/6kj/nTdCsdxBJOI/8nGghVMK9o
+2cCtjBNa2bih2jmXSURz35cM/wIAP8PdslMy6+UbZa/KnZLzsf7X9yNmdiHiUpen
+lX69+/sKR9KiZwU93aAx0E1uCwFwNn1ktVfV2Gp4oQKBgQDN4zQQnagZNUEuBsEX
+Z8KuiqXENBYveZOaLqLAK9PikbgnxsSmZAKvTMsJWzNncG2nPFEzxCUepMbyQAVe
+vhccFRqdlP7P41XyW1xnAbvQke8jn19KuMqrT9iikM8uSRcoR6WCh6dzOXud2yQn
+FqmxUlVYOzuV4EyMfnybLssVOQKBgQDMP7el11IwrHOpt01FBcis9BDW+HCEVhI8
+UX25dlDZk5U7pvozvRU0n21EwfJebxDRNAU2WGekUupkK9/4eS5eiWo8+EBHDzSU
+XFN7K0a+9OZ2/3EpByB7oH2EiFj2TdwDOhVeFqkL6Abe5Tl1G7LEiiwyYliW97XC
+8e3pD7VXPQKBgQCVBbsNu8+MT2uaMPFaS5QyWdCaL0lPm6QmmVLb3d1DxU2SHOEB
+vqni0Ka1YvnWCR6VSadM3NAxWftWJNi+NsDrZqsZHFtDhb0T6uT6+dpDoR2CnzyO
+DStEzEp1gHM1gVntoc4+qImfcR/0pkWItXKmEn4LmvQKC4vctUDj4f7EoQKBgCul
+riQliG3YXHs3La8DVmgHXBXkT38oOYtkSr64Vvy3+hseSreFv6NYMmyQGbAugeSC
+/l4ntDY8ddRkP9+EXfFb4jUXQ/0rdawCsuBOVjb2dM2XNuJyoHFq0Yfh70jrSInz
+/p71rrhZpCY7y/SHr8MqV9mIhK/2TYRUWOgGMFVtAoGBAJXExBeS1U4u/k88Yz3I
+a8L6exZAa32v8p4n9VqBR+1FX0AsbsRCDO/fVanFbPWCOIG7Iil/UwwzXk254YHT
+w0LaHBLLAoWn/N031YhhB/1GuVOVaBexEWwdEGWGKC8YzHu2874OJEOjUyyRzk7l
+51UVZb8uxPfq1KqOYNo+3nXN
+-----END PRIVATE KEY-----
+"
     internal-auth-header: "X-Internal-Auth"
     authorization-header: "Authorization"
     token-prefix: "Bearer "

@@ -30,8 +30,6 @@ public class SimpleSecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/health").permitAll()
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/internal/**").hasRole("INTERNAL")
                 .anyRequest().authenticated()
             )
             // Filter order: Internal Token Validation -> JWT Context Storage

@@ -21,6 +21,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,7 +42,7 @@ public class AuthService {
     private final TokenCacheService tokenCacheService;
 
     @Transactional
-    public TokenResponse register(RegisterRequest request) {
+    public TokenResponse register(RegisterRequest request) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
         log.info("Registering new user: {}", request.getUsername());
 
         // Check if user already exists

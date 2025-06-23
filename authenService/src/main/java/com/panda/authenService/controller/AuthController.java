@@ -11,6 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
 
 @RestController
@@ -23,7 +26,7 @@ public class AuthController {
     private final TokenCacheService tokenCacheService;
 
     @PostMapping("/register")
-    public ResponseEntity<TokenResponse> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<TokenResponse> register(@Valid @RequestBody RegisterRequest request) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
         log.info("Registration request for username: {}", request.getUsername());
         return ResponseEntity.ok(authService.register(request));
     }

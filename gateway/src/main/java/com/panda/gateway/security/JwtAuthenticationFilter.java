@@ -1,5 +1,6 @@
 package com.panda.gateway.security;
 
+import com.panda.gateway.service.InternalTokenService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -42,7 +43,30 @@ public class JwtAuthenticationFilter implements WebFilter {
         String jwt = authHeader.substring(7);
 
         try {
-            if (jwtService.validateToken(jwt)) {
+            if(apiPublic(exchange)){
+
+                // Generate internal token for downstream services
+                String internalToken = internalTokenService.generateInternalToken("admin", jwt);
+
+                // Add internal token to request headers
+                ServerWebExchange modifiedExchange = exchange.mutate()
+                    .request(builder -> builder
+                        .header("X-Internal-Auth", internalToken)
+                        .header("X-Username", "admin")
+                    )
+                    .build();
+
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                    "admin",
+                    null,
+                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                );
+
+                return chain.filter(modifiedExchange)
+                    .contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth));
+            }
+
+            else if (jwtService.validateToken(jwt)) {
                 String username = jwtService.extractUsername(jwt);
                 log.debug("Valid JWT token found for user: {} accessing path: {}", username, path);
 
@@ -74,5 +98,10 @@ public class JwtAuthenticationFilter implements WebFilter {
         }
 
         return chain.filter(exchange);
+    }
+
+    private Boolean apiPublic(ServerWebExchange exchange) {
+        String path = exchange.getRequest().getPath().value();
+        return path.equals("/api/auth/login") || path.equals("/api/auth/register");
     }
 }
