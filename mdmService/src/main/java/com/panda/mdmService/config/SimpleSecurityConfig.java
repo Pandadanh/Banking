@@ -1,41 +1,24 @@
 package com.panda.mdmService.config;
 
-import com.panda.mdmService.security.InternalAuthenticationFilter;
-import com.panda.mdmService.security.JwtContextFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebFluxSecurity
 public class SimpleSecurityConfig {
 
-    private final InternalAuthenticationFilter internalAuthenticationFilter;
-    private final JwtContextFilter jwtContextFilter;
-
-    public SimpleSecurityConfig(InternalAuthenticationFilter internalAuthenticationFilter,
-                               JwtContextFilter jwtContextFilter) {
-        this.internalAuthenticationFilter = internalAuthenticationFilter;
-        this.jwtContextFilter = jwtContextFilter;
-    }
-
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/mdm/health").permitAll()
-                .requestMatchers("/api/mdm/internal/**").hasRole("INTERNAL")
-                .anyRequest().authenticated()
+            .csrf(ServerHttpSecurity.CsrfSpec::disable)
+            .authorizeExchange(exchanges -> exchanges
+                .pathMatchers("/api/mdm/health").permitAll()
+                .pathMatchers("/users/**").permitAll() // Temporarily allow all for testing
+                .anyExchange().authenticated()
             )
-            // Filter order: Internal Token Validation -> JWT Context Storage
-            .addFilterBefore(internalAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(jwtContextFilter, InternalAuthenticationFilter.class)
             .build();
     }
 }

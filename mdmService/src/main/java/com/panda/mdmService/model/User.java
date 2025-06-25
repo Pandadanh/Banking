@@ -5,26 +5,110 @@ import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table("USERS")
 public class User {
-    @NotBlank(message = "User ID is required")
-    private String userId;
+    @Id
+    @Column("Id")
+    private UUID id;
 
-    @Pattern(regexp = "^[0-9]{10,11}$", message = "Phone number must be 10-11 digits")
-    private String phone;
+    @Column("TenantId")
+    private UUID tenantId;
 
-    @NotBlank(message = "Tenant ID is required")
-    private String tenantId;
+    @Column("UserName")
+    private String userName;
 
-    @NotBlank(message = "Tenant code is required")
-    private String tenantCode;
+    @Column("NormalizedUserName")
+    private String normalizedUserName;
 
-    private String employeeId;
-    private String employeeCode;
-    private String firstName;
-    private String lastName;
-    private String type;
+    @Column("Name")
+    private String name;
+
+    @Column("Surname")
+    private String surname;
+
+    @Column("Email")
+    private String email;
+
+    @Column("NormalizedEmail")
+    private String normalizedEmail;
+
+    @Column("EmailConfirmed")
+    private Boolean emailConfirmed = false;
+
+    @Column("PasswordHash")
+    private String passwordHash;
+
+    @Column("SecurityStamp")
+    private String securityStamp;
+
+    @Column("IsExternal")
+    private Boolean isExternal = false;
+
+    @Column("PhoneNumber")
+    private String phoneNumber;
+
+    @Column("PhoneNumberConfirmed")
+    private Boolean phoneNumberConfirmed = false;
+
+    @Column("IsActive")
+    private Boolean isActive = true;
+
+    @Column("TwoFactorEnabled")
+    private Boolean twoFactorEnabled = false;
+
+    @Column("LockoutEnd")
+    private OffsetDateTime lockoutEnd;
+
+    @Column("LockoutEnabled")
+    private Boolean lockoutEnabled = false;
+
+    @Column("AccessFailedCount")
+    private Integer accessFailedCount = 0;
+
+    @Column("ExtraProperties")
+    private String extraProperties = "";
+
+    @Column("ConcurrencyStamp")
+    private String concurrencyStamp = "";
+
+    @Column("CreationTime")
+    private LocalDateTime creationTime;
+
+    @Column("CreatorId")
+    private UUID creatorId;
+
+    @Column("LastModificationTime")
+    private LocalDateTime lastModificationTime;
+
+    @Column("LastModifierId")
+    private UUID lastModifierId;
+
+    @Column("IsDeleted")
+    private Boolean isDeleted = false;
+
+    @Column("DeleterId")
+    private UUID deleterId;
+
+    @Column("DeletionTime")
+    private LocalDateTime deletionTime;
+
+    @Column("EntityVersion")
+    private Integer entityVersion = 0;
+
+    @Column("LastPasswordChangeTime")
+    private OffsetDateTime lastPasswordChangeTime;
+
+    @Column("ShouldChangePasswordOnNextLogin")
+    private Boolean shouldChangePasswordOnNextLogin = false;
 }

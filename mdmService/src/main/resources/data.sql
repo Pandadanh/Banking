@@ -1,0 +1,6 @@
+-- Insert sample data
+INSERT INTO USERS (USER_ID, PHONE, TENANT_ID, TENANT_CODE, EMPLOYEE_ID, EMPLOYEE_CODE, FIRST_NAME, LAST_NAME, TYPE) 
+VALUES ('7d7584f9-9dc3-e299-2c66-3a1a4723f1ba', '0773102102', 'b93957cf-2faf-654b-0a9d-3a18a5c1c21b', 'OFVMT', '6ed8d90f-df9a-4400-6775-08dda27aaa3e', 'EMPPG0013', 'Employee', '13', 'PG');
+
+-- Commit the transaction
+COMMIT;
