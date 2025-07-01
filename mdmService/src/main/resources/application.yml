@@ -10,6 +10,8 @@ spring:
     url: r2dbc:oracle://localhost:1521/XEPDB1
     username: BANKING_USER
     password: BankingPassword123
+    ddl-auto: update
+
   sql:
     init:
       mode: always
